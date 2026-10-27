@@ -1,69 +1,64 @@
-import Image from "next/image";
+import { Phone, ShieldCheck, Star, Clock, Award, CheckCircle2, Wrench, Droplet, Flame, Hammer, Sparkles, ChevronRight, MapPin } from "lucide-react";
+import HeroIntakeSection from "@/components/hero-intake-section";
+import MobileStickyActionBar from "@/components/mobile-sticky-action-bar";
+
+const services = [
+  { title: "Emergency Plumbing & Leaks", icon: Droplet, desc: "Rapid leak detection, pipe repair, burst supply lines, and fixture replacements.", price: "From $149", badge: "24/7 Available" },
+  { title: "Water Heater Replacement", icon: Flame, desc: "Same-day tankless and traditional water heater installation and pilot servicing.", price: "From $850", badge: "Same-Day Install" },
+  { title: "Hydro-Jetting & Drain Clearing", icon: Wrench, desc: "Deep sewer main clearance, video camera line inspections, and stubborn clog removal.", price: "From $199", badge: "Popular" },
+  { title: "Kitchen & Bath Rough-ins", icon: Hammer, desc: "Complete code-compliant re-piping, vanity hookups, and shower valve modernizations.", price: "Custom Estimate", badge: "Licensed Specialist" },
+  { title: "Whole-Home Water Filtration", icon: Sparkles, desc: "Reverse osmosis, water softeners, and sediment filters for pure household water.", price: "From $650", badge: "Clean Water Certified" },
+  { title: "Preventative Inspection Tune-up", icon: CheckCircle2, desc: "Comprehensive multi-point home plumbing health check and pressure valve balancing.", price: "$89 Flat", badge: "Best Value" },
+];
+const testimonials = [
+  { name: "Mark Henderson", area: "North Hills • 3 days ago", comment: "Had a main line backup on a Sunday afternoon. Dave arrived in under 40 minutes, scoped the line, and resolved it before water reached our hardwood. Transparent pricing and zero surprises." },
+  { name: "Sarah Lindqvist", area: "Oakridge Estates • 1 week ago", comment: "Swapped our 15-year-old rusted water heater with a high-efficiency unit. The online booking and direct text notification kept me updated the entire time. Top tier workmanship." },
+  { name: "Robert C. Martinez", area: "Downtown Riverfront • 2 weeks ago", comment: "Fair quote, fast work, and clean cleanup. Most contractors don’t even pick up the phone—these guys confirmed my request within 3 minutes of submitting the form." },
+];
+const projects = [
+  { title: "Tankless Water Heater Upgrade", subtitle: "Rheem High-Efficiency 9.5 GPM Unit", badge: "Same-Day Emergency", description: "Replaced failed 50-gallon leaking tank with wall-hung continuous hot water unit in garage.", location: "Seacliff Dr • Job Duration: 4.5 hrs", gradient: "from-slate-800 to-slate-700" },
+  { title: "Sewer Lateral Hydro-Jet & Sleeve", subtitle: "Tree root intrusion cleared & relined", badge: "Trenchless Repair", description: "Zero yard excavation needed. Cleared root blockage and installed 45ft epoxy pipe liner.", location: "Bayview Ave • Job Duration: 6 hrs", gradient: "from-teal-950 to-slate-800" },
+  { title: "Master Bath Rough-In Plumbing", subtitle: "Dual vanity + thermostatic shower valves", badge: "Full Renovation", description: "New PEX manifold lines, silent drainage drops, and frameless drain installation.", location: "Highland Way • Job Duration: 2 days", gradient: "from-slate-900 to-teal-900" },
+];
+const container = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8";
+const chip = "rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold tracking-widest text-teal-700 uppercase";
+function Stars() { return <span aria-label="5 out of 5 stars" className="flex gap-1 text-amber-400">{Array.from({ length: 5 }, (_, i) => <Star key={i} aria-hidden="true" className="size-4 fill-amber-400" />)}</span>; }
+
+async function CopyrightYear() {
+  "use cache";
+  return new Date().getFullYear();
+}
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+  return <div className="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900 antialiased sm:pb-0">
+    <a href="#main-content" className="sr-only fixed top-2 left-2 z-60 rounded bg-white p-3 focus:not-sr-only">Skip to content</a>
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+      <div className={`${container} flex min-h-20 items-center justify-between gap-3 py-3`}>
+        <a href="#" aria-label="ApexPro home" className="flex items-center gap-3"><span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-teal-800 text-white shadow-md"><Wrench className="size-6" /></span><div><div className="flex items-center gap-2"><span className="text-xl font-extrabold tracking-tight">APEX<span className="text-teal-700">PRO</span></span><span className="hidden rounded-full border border-teal-200 bg-teal-100 px-2 py-0.5 text-[11px] font-bold text-teal-800 sm:inline-block">LIC #1048291</span></div><p className="hidden text-xs font-medium text-slate-500 sm:block">Licensed Plumbing & Mechanical Contractor</p></div></a>
+        <nav aria-label="Contact" className="flex items-center gap-6"><a href="tel:+18315550192" aria-label="Call ApexPro at (831) 555-0192" className="group hidden items-center gap-3 lg:flex"><span className="flex size-10 items-center justify-center rounded-full bg-amber-50 text-amber-600"><Phone className="size-5" /></span><span><span className="block text-xs font-semibold tracking-wider text-slate-500 uppercase">Direct Dispatch</span><span className="font-extrabold group-hover:text-teal-700">(831) 555-0192</span></span></a><a href="#quote-section" className="flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-teal-800 sm:px-5 sm:text-base">Request Free Quote<ChevronRight className="hidden size-4 sm:inline" /></a></nav>
+      </div>
+    </header>
+    <main id="main-content">
+      <section className="relative overflow-hidden bg-linear-to-b from-slate-900 via-slate-900 to-slate-800 pt-12 pb-20 text-white">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px] opacity-10" />
+        <div className={`${container} relative grid items-center gap-12 lg:grid-cols-12`}>
+          <div className="space-y-6 text-center lg:col-span-7 lg:text-left"><div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-slate-700/80 bg-slate-800/80 px-3.5 py-1.5 text-xs text-slate-300 sm:text-sm"><Stars /><span className="font-semibold text-white">4.9 / 5.0</span><span className="hidden text-slate-400 sm:inline">• 180+ Local Google Reviews</span></div>
+            <h1 className="text-3xl leading-[1.15] font-black tracking-tight sm:text-5xl lg:text-6xl">Fast, Reliable Plumbing <br className="hidden sm:inline" /><span className="bg-linear-to-r from-teal-300 via-teal-200 to-amber-300 bg-clip-text text-transparent">Fixed Right in 1 Visit.</span></h1>
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-300 sm:text-lg lg:mx-0">Emergency leaks, drain clogs, and water heater breakdowns solved by local licensed technicians. Upfront flat-rate pricing with zero hidden travel charges.</p>
+            <div className="mx-auto grid max-w-lg grid-cols-2 gap-3 pt-3 text-left text-xs font-medium text-slate-200 sm:grid-cols-3 sm:text-sm lg:mx-0">{[{ icon: Clock, text: "60-Min Arrival Window" }, { icon: ShieldCheck, text: "Licensed & Bonded" }, { icon: Award, text: "100% Guaranteed" }].map(({ icon: Icon, text }) => <div key={text} className="flex items-center gap-2"><Icon className="size-4 shrink-0 text-teal-400" /><span>{text}</span></div>)}</div>
+          </div>
+          <div id="quote-section" className="scroll-mt-28 lg:col-span-5"><HeroIntakeSection /></div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      </section>
+      <section aria-label="Our credentials" className="border-y border-slate-200 bg-white py-6"><div className={`${container} grid grid-cols-2 gap-6 text-center md:grid-cols-4`}>{[["15+", "Years In Business", "Serving Local County"], ["$2M", "Fully Insured", "General Liability & Bonded"], ["100%", "Upfront Pricing", "No Hidden Dispatch Fees"], ["4.9★", "Top Rated Pro", "Over 180+ 5-Star Reviews"]].map(([value, title, detail]) => <div key={title} className="space-y-1"><div className="text-2xl font-extrabold text-teal-700 sm:text-3xl">{value}</div><p className="text-xs font-semibold tracking-wider text-slate-700 uppercase sm:text-sm">{title}</p><p className="text-xs text-slate-500">{detail}</p></div>)}</div></section>
+      <section className="py-16 sm:py-24"><div className={container}><div className="mx-auto mb-14 max-w-3xl text-center"><span className={chip}>Our Capabilities</span><h2 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">Comprehensive Residential & Commercial Plumbing</h2><p className="mt-3 text-sm text-slate-600 sm:text-base">Every job is performed with heavy-duty commercial grade fixtures and backed by our unconditional 1-year labor warranty.</p></div>
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">{services.map(({ title, icon: Icon, desc, price, badge }) => <article key={title} className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-shadow hover:shadow-md"><div><div className="mb-4 flex items-center justify-between gap-2"><span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-800 transition-colors group-hover:bg-teal-700 group-hover:text-white"><Icon className="size-6" /></span><span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600">{badge}</span></div><h3 className="mb-2 text-lg font-bold group-hover:text-teal-800">{title}</h3><p className="mb-6 text-sm leading-relaxed text-slate-600">{desc}</p></div><div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4"><div><span className="block text-xs font-medium text-slate-500">Estimated Range</span><span className="font-extrabold">{price}</span></div><a href="#quote-section" data-intake-source="service_card" aria-label={`Book ${title}`} className="flex items-center gap-1 text-xs font-bold text-teal-700 hover:text-teal-900">Book Service<ChevronRight className="size-3.5" /></a></div></article>)}</div>
+      </div></section>
+      <section className="border-t border-slate-200 bg-white py-16"><div className={container}><div className="mb-12 flex flex-col justify-between gap-3 md:flex-row md:items-end"><div><span className={chip}>Verified Work</span><h2 className="mt-3 text-3xl font-extrabold tracking-tight">Completed Jobs in Your Neighborhood</h2></div><p className="max-w-md text-sm text-slate-500">Clean copper and PEX installations, pressure-tested and passed by local city inspectors on first review.</p></div><div className="grid gap-6 md:grid-cols-3">{projects.map((project) => <article key={project.title} className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50"><div className={`relative flex h-48 flex-col justify-end bg-linear-to-tr ${project.gradient} p-4 text-white`}><span className="absolute top-3 left-3 rounded bg-teal-600 px-2 py-0.5 text-[11px] font-bold">{project.badge}</span><h3 className="font-bold">{project.title}</h3><p className="text-xs text-slate-300">{project.subtitle}</p></div><div className="flex flex-1 flex-col justify-between gap-3 p-4 text-xs text-slate-600"><p>{project.description}</p><p className="flex items-center gap-1 border-t border-slate-200 pt-2 text-slate-500"><MapPin className="size-3.5 shrink-0" />{project.location}</p></div></article>)}</div></div></section>
+      <section className="bg-slate-100 py-16 sm:py-20"><div className={container}><div className="mx-auto mb-12 max-w-2xl text-center"><h2 className="text-3xl font-extrabold tracking-tight">Real Reviews from Real Neighbors</h2><p className="mt-2 text-sm text-slate-600">We pride ourselves on prompt arrivals, spotless clean-ups, and direct communication.</p></div><div className="grid gap-6 md:grid-cols-3">{testimonials.map((review) => <figure key={review.name} className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div><Stars /><blockquote className="mt-3 mb-4 text-sm leading-relaxed text-slate-700 italic">&ldquo;{review.comment}&rdquo;</blockquote></div><figcaption className="flex items-center justify-between gap-2 border-t border-slate-100 pt-3"><div><p className="text-sm font-bold">{review.name}</p><span className="text-[11px] text-slate-500">{review.area}</span></div><span className="flex items-center gap-1 rounded border border-teal-100 bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-teal-700"><CheckCircle2 className="size-3" />Verified</span></figcaption></figure>)}</div></div></section>
+      <section className="bg-teal-900 py-12 text-white"><div className="mx-auto max-w-5xl space-y-5 px-4 text-center"><h2 className="text-2xl font-extrabold tracking-tight sm:text-4xl">Need an Honest Estimate Without the Runaround?</h2><p className="mx-auto max-w-xl text-sm text-teal-100 sm:text-base">Give us a call right now or submit our simple form. Our dispatch tech monitors incoming inquiries 7 days a week.</p><div className="flex flex-col items-center justify-center gap-4 pt-2 sm:flex-row"><a href="tel:+18315550192" aria-label="Call ApexPro at (831) 555-0192" className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-8 py-3.5 font-extrabold text-slate-950 shadow-lg hover:bg-amber-300 sm:w-auto"><Phone className="size-5" />Call (831) 555-0192</a><a href="#quote-section" data-intake-source="footer_form" className="w-full rounded-xl border border-teal-600 bg-teal-800 px-8 py-3.5 font-bold hover:bg-teal-700 sm:w-auto">Request Online Estimate</a></div></div></section>
+    </main>
+    <footer className="border-t border-slate-800 bg-slate-900 py-10 text-xs text-slate-400"><div className={`${container} flex flex-col items-center justify-between gap-4 sm:flex-row`}><div><span className="text-sm font-bold text-white">APEX PRO CONTRACTORS</span><p className="mt-1">Licensed, Bonded & Insured • California State License Board #1048291</p></div><p>© <CopyrightYear /> ApexPro Services LLC. All rights reserved.</p></div></footer>
+    <MobileStickyActionBar />
+  </div>;
 }
