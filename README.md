@@ -59,6 +59,7 @@ Inspection select values respectively. Invalid requests return HTTP 400 with
 `{ success: false, error, errors: { fieldName: [messages] } }`. Body size is capped
 at 8 KiB, and cross-origin browser posts are rejected.
 
+Resend owner alerts run after either webhook acceptance or a direct Airtable save.
 The primary path sends the exact `lead.created` envelope from the handoff with a
 `submittedAt` timestamp. Configure API Key authentication on the Make Custom
 Webhook using `MAKE_WEBHOOK_SECRET`; the route sends it in `x-make-apikey`.
@@ -68,10 +69,10 @@ Make's plain-text acceptance response is supported. See
 [Make response semantics](https://help.make.com/webhooks).
 
 If Make fails or is unconfigured, the route writes directly to Airtable using a
-personal access token. After storage, it attempts owner and customer SMS in
-parallel via Twilio. Configure all direct-path Twilio settings to enable those
-notifications. Missing settings or failed sends are logged with a lead ID and
-recipient category only. A notification failure does not erase an accepted lead
+personal access token. After storage, it sends the owner alert through Resend. Optional existing
+Twilio settings still enable direct-path owner and customer SMS; Twilio is not
+required for email alerts. Notification tasks run in parallel, and failed sends
+are logged with a lead ID. A notification failure does not erase an accepted lead
 or encourage the customer to create another record. See the
 [Airtable API guide](https://support.airtable.com/docs/getting-started-with-airtables-web-api)
 and [Twilio Messages API](https://www.twilio.com/docs/messaging/api/message-resource).
@@ -79,7 +80,7 @@ and [Twilio Messages API](https://www.twilio.com/docs/messaging/api/message-reso
 Success returns `{ success: true, timestamp, leadId }`. For Make, `leadId` is a
 correlation UUID; for direct Airtable it is a record ID. This confirms acceptance
 or storage, not downstream completion or handset delivery. There are no blind
-automatic retries. The webhook, Airtable, and SMS calls each have an 8-second
+automatic retries. The webhook, Airtable, email, and SMS calls each have an 8-second
 timeout, with SMS calls parallelized and a 30-second route budget.
 
 ### Airtable setup
@@ -134,6 +135,36 @@ and notification failures. A live Make/Airtable/Twilio round trip has not been
 performed without credentials. Test with your designated number before launch,
 including iOS keyboard behavior, failure recovery, and SMS timing. Sub-second
 mobile loads and confirmation within 60 seconds are targets, not measured
-results. No email field/provider is configured; auto-confirmation uses SMS.
+results. The form has no customer email field. Resend emails the owner only; customer
+confirmation remains the on-page message unless optional SMS is configured.
 The phone, license, reviews, project details, prices, and service promises remain
 prototype business content and need verification before publication.
+
+### Resend owner alert setup
+
+1. Create a Resend API key. Set `RESEND_API_KEY`, `CONTRACTOR_ALERT_EMAIL`, and
+   `RESEND_FROM_EMAIL` in Vercel's Production environment and redeploy this code.
+2. For the first test, use `ApexPro Leads <onboarding@resend.dev>` as the sender
+   and the email address associated with your Resend account as the recipient.
+3. For any other recipient, verify a domain in Resend, add its required DNS
+   records, and use a sender on that domain. The Vercel `.vercel.app` hosting
+   address is not a sender domain you own. See
+   [Resend sender restrictions](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain).
+4. Submit one lead with a number you control. Confirm Airtable storage and the
+   owner email. Check Vercel logs for `intake.email_accepted`,
+   `intake.email_failed`, or `intake.email_unconfigured`. API acceptance does not
+   guarantee inbox delivery; check Resend delivery events and spam folders too.
+
+The alert includes escaped HTML, plain text, and a click-to-call link. It uses an
+8-second timeout and a provider idempotency key derived from the accepted lead ID.
+Resend failures do not turn an accepted lead into a failed submission. No live
+emails were sent by the automated tests. Resend's SDK may print provider error
+information in development; production application logs omit provider messages.
+
+A carrier gateway address can be configured as the owner recipient, but delivery
+and formatting depend on that carrier. Verify support before relying on it:
+[Verizon is shutting down Vtext/VZWPix email-to-text](https://www.verizon.com/support/vtext-vzwpix-shutdown/).
+Start with a normal email inbox and phone push notifications. This integration
+does not infer a customer's carrier or send customer confirmation by email.
+If Make also sends an owner email, disable that duplicate module; this server
+already sends an alert after Make acceptance (before downstream storage is confirmed).

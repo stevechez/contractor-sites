@@ -18,14 +18,14 @@ const modules = {
 for (const [name, path] of Object.entries(modules)) {
   const source = await readFile(path, "utf8");
   let code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
-  code = code.replace(/from "(?:\.\.\/)+lib\/(\w+)"/g, 'from "./$1.mjs"').replace('from "zod"', `from ${JSON.stringify(import.meta.resolve("zod"))}`);
+  code = code.replace(/from "(?:\.\.\/)+lib\/(\w+)"/g, 'from "./$1.mjs"').replace('from "zod"', `from ${JSON.stringify(import.meta.resolve("zod"))}`).replace('from "resend"', `from ${JSON.stringify(import.meta.resolve("resend"))}`);
   await writeFile(join(directory, `${name}.mjs`), code);
 }
 const { POST } = await import(pathToFileURL(join(directory, "route.mjs")).href);
 const { intakeSchema } = await import(pathToFileURL(join(directory, "schemas.mjs")).href);
 const originalEnv = { ...process.env };
 const originalFetch = globalThis.fetch;
-const envKeys = ["MAKE_WEBHOOK_URL", "MAKE_WEBHOOK_SECRET", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_TABLE_NAME", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "TWILIO_MESSAGING_SERVICE_SID", "BUSINESS_OWNER_PHONE"];
+const envKeys = ["MAKE_WEBHOOK_URL", "MAKE_WEBHOOK_SECRET", "AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "AIRTABLE_TABLE_NAME", "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER", "TWILIO_MESSAGING_SERVICE_SID", "BUSINESS_OWNER_PHONE", "RESEND_API_KEY", "RESEND_FROM_EMAIL", "CONTRACTOR_ALERT_EMAIL"];
 beforeEach(() => { envKeys.forEach((key) => delete process.env[key]); });
 afterEach(() => { globalThis.fetch = originalFetch; process.env = { ...originalEnv }; });
 after(async () => { await rm(directory, { recursive: true, force: true }); });
@@ -135,5 +135,59 @@ test("all dispatch failures return a safe error without credentials or provider 
 });
 test("invalid Airtable success response is not reported as a stored lead", async () => {
   airtable(); globalThis.fetch = async () => Response.json({});
+  assert.equal((await POST(request())).status, 502);
+});
+
+function email() {
+  Object.assign(process.env, { RESEND_API_KEY: "re_test", CONTRACTOR_ALERT_EMAIL: "owner@example.com", RESEND_FROM_EMAIL: "Leads <leads@example.com>" });
+}
+test("stored Airtable leads trigger an escaped Resend alert with text and idempotency", async () => {
+  airtable(); email();
+  let emails = 0;
+  globalThis.fetch = async (url, options) => {
+    if (String(url).includes("airtable.com")) return Response.json({ records: [{ id: "recEmail" }] });
+    assert.equal(String(url), "https://api.resend.com/emails");
+    const payload = JSON.parse(options.body);
+    assert.equal(payload.to, "owner@example.com");
+    assert.equal(payload.from, "Leads <leads@example.com>");
+    assert.ok(payload.text.includes("tel:+18315550192"));
+    assert.ok(payload.html.includes("&lt;img src=x&gt;"));
+    assert.equal(payload.html.includes("<img src=x>"), false);
+    assert.equal(new Headers(options.headers).get("Idempotency-Key"), "owner-alert/recEmail");
+    emails++;
+    return Response.json({ id: "emailTest" });
+  };
+  assert.equal((await POST(request({ ...lead, description: "<img src=x>" }))).status, 200);
+  assert.equal(emails, 1);
+});
+test("webhook-accepted leads also trigger exactly one owner email", async () => {
+  webhook(); email();
+  let emails = 0;
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("make.com")) return new Response("Accepted");
+    assert.equal(String(url), "https://api.resend.com/emails");
+    emails++;
+    return Response.json({ id: "emailMake" });
+  };
+  assert.equal((await POST(request())).status, 200);
+  assert.equal(emails, 1);
+});
+test("Resend API rejection and network failure never fail a saved lead", async () => {
+  airtable(); email();
+  for (const failure of ["api", "network"]) {
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("airtable.com")) return Response.json({ records: [{ id: "recStored" }] });
+      if (failure === "network") throw new Error("Provider unavailable");
+      return Response.json({ name: "validation_error", message: "private provider details", statusCode: 403 }, { status: 403 });
+    };
+    assert.equal((await POST(request())).status, 200);
+  }
+});
+test("failed lead storage sends no email", async () => {
+  airtable(); email();
+  globalThis.fetch = async (url) => {
+    assert.ok(String(url).includes("airtable.com"));
+    return new Response("Unavailable", { status: 503 });
+  };
   assert.equal((await POST(request())).status, 502);
 });

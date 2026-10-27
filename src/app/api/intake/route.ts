@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { intakeSchema, validationErrors } from "../../../lib/schemas";
 import { airtableConfigured, createAirtableLead } from "../../../lib/airtable";
-import { notifyDirectLead } from "../../../lib/notifications";
+import { notifyDirectLead, sendOwnerAlert } from "../../../lib/notifications";
 import type { IntakeResponse, LeadCreatedEvent } from "../../../types/intake";
 
 // Node.js is the default runtime; cacheComponents disallows a runtime override.
@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       if (!response.ok) throw new Error("Webhook rejected lead");
       // Make may return plain-text 'Accepted'. This ID is a correlation ID,
       // not an Airtable record ID, and acceptance does not assert SMS delivery.
+      await sendOwnerAlert(event.data, requestId);
       return json({ success: true, timestamp, leadId: requestId }, 200);
     } catch {
       console.error("intake.webhook_failed", { leadId: requestId });
